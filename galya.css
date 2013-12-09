@@ -1,0 +1,42 @@
+.galya { position:relative; max-width:725px; overflow:hidden; }
+.galya-slides {
+    position:relative;
+    margin:0; padding:0;
+}
+
+.galya-slide.active { display:block; }
+.galya-slide {
+    position:absolute; display:none; overflow:hidden;
+    width:100%; height:100%;  margin:0;
+}
+
+.galya-image { position:absolute; max-width:100%; width:100%; height:auto; cursor:pointer; }
+.galya-caption {
+    position:absolute; bottom:0; z-index:20;
+    width:100%; padding:0.5em 1em; box-sizing:border-box;
+    color:#fff; text-shadow:0 1px 2px #000; background:rgba(0,0,0, 0.4);
+}
+
+.galya-caption-heading { margin:0 0 0.5em 0; }
+.galya-caption-content { margin:0; }
+
+.galya-thumbnails { position:relative; overflow:hidden; width:100%; margin:0.25em 0 0 0; }
+.galya-thumbnails-scrollable { position:absolute; width:100000px; }
+.galya-thumbnail:first-child { margin-left:0; }
+.galya-thumbnail.active,
+.galya-thumbnail:hover { opacity:1; }
+.galya-thumbnail {
+    display:inline-block;
+    width:110px; height:auto; margin-left:5px;
+    opacity:0.45; cursor:pointer;
+}
+
+.galya-prev:hover { opacity:1; }
+.galya-prev {
+    position:absolute; display:table; top:0; z-index:15; left:0;
+    width:55px;
+    font-size:3em; text-align:center; color:rgba(255,255,255,0.7); cursor:pointer;
+    background:rgba(0,0,0,0.25); opacity:0;
+}
+
+.galya-prev > span { display:table-cell; vertical-align:middle; }
