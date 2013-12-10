@@ -231,13 +231,20 @@
 
         // Activates a stage (slide and its thumbnail)
         function activateStage(direction){
-            var $stage = getStageByIndex(getStageIndexByDirection(direction));
-            props.stageIndex = $stage.slide.index();
+            props.stage = getStageByIndex(getStageIndexByDirection(direction));
+            props.stageIndex = props.stage.slide.index();
+
+            $container.triggerHandler('stage.activating', [props.stageIndex, props.stage]);
+
             props.oldStageIndex = deactivateStage();
 
-            activateSlide($stage.slide);
-            activateThumb($stage.thumb);
+            activateSlide(props.stage.slide);
+            activateThumb(props.stage.thumb);
             scrollThumbs(direction);
+
+            //$container.on('thumbs.scrollingEnd', function(){
+            $container.triggerHandler('stage.activated', [props.stageIndex, props.stage]);
+            //});
         }
 
         // Sets the slide active
@@ -254,8 +261,14 @@
 
         // Sets inactive currently active slide and thumbnail
         function deactivateStage(){
-            deactivateSlide();
-            return deactivateThumb();
+            $container.triggerHandler('stage.deactivating', [props.stageIndex, props.stage]);
+
+            var index = deactivateSlide();
+            deactivateThumb();
+
+            $container.triggerHandler('stage.deactivated', [props.stageIndex, props.stage]);
+
+            return index;
         }
 
         // Sets inactive currently active slide
@@ -278,53 +291,6 @@
             $element.removeClass(classes.active);
 
             return index;
-        }
-
-        // Gets a slide that is currently being shown
-        function getActiveElement($collection){
-            return $collection.filter(function(idx, el){
-                return $(el).hasClass(classes.active);
-            }).first();
-        }
-
-        // Filters a collection by given index
-        function getElementByIndex($collection, index){
-            return $collection.filter(function(idx, el){
-                return $(el).index() == index;
-            }).first();
-        }
-
-        // Guesses the following stage index by the given direction.
-        // Stops from overflowing the number of the gallery slides
-        // by 'flushing' the index to zero or the number of the slides.
-        function getStageIndexByDirection(direction){
-            var activeIndex = getActiveElement($objects.slides).index();
-
-            switch(direction){
-                case 'prev':
-                    --activeIndex;
-                    break;
-
-                case 'next':
-                    ++activeIndex;
-                    break;
-
-                default:
-                    activeIndex = direction; // if the value is integer
-                    break;
-            }
-
-            var min = 0;
-            var max = $objects.slides.length-1;
-
-            if (activeIndex > max){
-                activeIndex = min;
-            }
-            else if (activeIndex < min){
-                activeIndex = max;
-            }
-
-            return activeIndex;
         }
 
         // Performs thumbnails container srolling
@@ -381,6 +347,53 @@
             else if (isLastOrFirstVisible){
                 $objects.thumbsScrollable.animate({ marginLeft: sign+props.initialOffset }, settings.scrollSpeed);
             }
+        }
+
+        // Gets a slide that is currently being shown
+        function getActiveElement($collection){
+            return $collection.filter(function(idx, el){
+                return $(el).hasClass(classes.active);
+            }).first();
+        }
+
+        // Filters a collection by given index
+        function getElementByIndex($collection, index){
+            return $collection.filter(function(idx, el){
+                return $(el).index() == index;
+            }).first();
+        }
+
+        // Guesses the following stage index by the given direction.
+        // Stops from overflowing the number of the gallery slides
+        // by 'flushing' the index to zero or the number of the slides.
+        function getStageIndexByDirection(direction){
+            var activeIndex = getActiveElement($objects.slides).index();
+
+            switch(direction){
+                case 'prev':
+                    --activeIndex;
+                    break;
+
+                case 'next':
+                    ++activeIndex;
+                    break;
+
+                default:
+                    activeIndex = direction; // if the value is integer
+                    break;
+            }
+
+            var min = 0;
+            var max = $objects.slides.length-1;
+
+            if (activeIndex > max){
+                activeIndex = min;
+            }
+            else if (activeIndex < min){
+                activeIndex = max;
+            }
+
+            return activeIndex;
         }
     }
 })(jQuery);
