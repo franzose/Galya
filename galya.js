@@ -1,4 +1,33 @@
-(function($, undefined){
+(function($, window, document){
+
+    // Idea is from
+    // https://github.com/louisremi/jquery.transform.js/blob/master/jquery.transform3d.js
+    function css3(properties){
+        var div = document.createElement('div'),
+            style = div.style,
+            prefixes = ['O', 'ms', 'Webkit', 'Moz'],
+            i = prefixes.length,
+            result = {};
+
+        while (i--){
+            !$.isArray(properties) && (properties = [properties]);
+
+            $.each(properties, function(key, val){
+                var property = val.slice(0,1).toUpperCase() + val.slice(1);
+                var prefixed = prefixes[i] + property;
+                var tmp = {};
+
+                if (prefixed in style){
+                    tmp[val] = prefixed;
+                    $.extend(result, tmp);
+                }
+            });
+        }
+
+        div = null;
+        return result;
+    }
+
     $.fn.galya = function(args){
         // Default settings
         var settings = {
@@ -113,10 +142,10 @@
             $objects.thumbs.width(settings.thumbnailWidth);
 
             var containerWidth = $objects.container.width();
-            var thumbWidth = $objects.thumbs.width();
+            var thumbWidth = getThumbWidth();
             props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
-            var thumbsMarginLeft = parseInt($objects.thumbs.last().css('margin-left')) * (props.visibleThumbs-1);
-            props.initialOffset = (thumbWidth * (props.visibleThumbs-1) + thumbsMarginLeft);
+            props.initialThumbsOffset = (thumbWidth * (props.visibleThumbs-1));
+            props.currentThumbsOffset = 0;
 
             activateStage(0);
 
@@ -128,6 +157,8 @@
                 $objects.thumbsContainer.height($objects.thumbs.parent().height());
                 $container.height(imageHeight+$objects.thumbsContainer.height());
                 $objects.prev.height(imageHeight);
+
+                $container.triggerHandler('galya.loaded');
             });
 
             // Slide clicked
@@ -165,6 +196,10 @@
                 title:   $image.data('title') || '',
                 content: $image.data('content') || ''
             }
+        }
+
+        function getThumbWidth(){
+            return $objects.thumbs.width() + parseInt($objects.thumbs.last().css('margin-left'));
         }
 
         // Render slides
@@ -252,6 +287,8 @@
             $slide.fadeIn(settings.fadeSpeed, function(){
                 $(this).addClass(classes.active);
             });
+
+            //settings.slideActivation().call();
         }
 
         // Sets the thumbnail active
@@ -308,44 +345,74 @@
             // Index of the current gallery slide.
             // It is used to determine, if the slide is the last or the first visible
             // in a row of the thumbnails, so we need to scroll its container left or right.
-            var currentIndex = null;
+            var currentIndex = (direction == 'prev' ? props.oldStageIndex : props.stageIndex);
 
-            switch(direction){
-                case 'prev':
-                    sign = '+=';
-                    currentIndex = props.oldStageIndex;
-                    break;
-
-                case 'next':
-                    sign = '-=';
-                    currentIndex = props.stageIndex;
-                    break;
-
-                default:
-                    sign = (props.stageIndex > props.oldStageIndex ? '-=' : '+=');
-                    currentIndex = props.stageIndex;
-                    break;
-            }
-
+            //
             var isLastOrFirstVisible = (currentIndex != 0 && (currentIndex % (props.visibleThumbs-1) == 0));
 
             // When the last slide of the gallery is reached,
             // we scroll the thumbnails container back to the first slide
             if (endReached){
-                $objects.thumbsScrollable.animate({ marginLeft: 0 }, settings.scrollSpeed);
+                props.currentThumbsOffset = 0;
             }
             // Whe the first slide of the gallery is reached,
             // in opposite, we scroll the thumbnails container to the last slide
             else if (startReached){
-                $objects.thumbsScrollable.animate({
-                    marginLeft: -(props.initialOffset * ($objects.slides.length/props.visibleThumbs))
-                }, settings.scrollSpeed);
+                props.currentThumbsOffset = -(props.initialThumbsOffset * Math.floor(($objects.slides.length/props.visibleThumbs)));
             }
             // When we get a thumbnail that is the first or the last visible
             // in the current stack of thumbnails, we scrool the thumbnails container
             // by direction, determined by the sign
             else if (isLastOrFirstVisible){
-                $objects.thumbsScrollable.animate({ marginLeft: sign+props.initialOffset }, settings.scrollSpeed);
+                switch(direction){
+                    case 'prev':
+                        props.currentThumbsOffset += props.initialThumbsOffset;
+                        break;
+
+                    case 'next':
+                        props.currentThumbsOffset -= props.initialThumbsOffset;
+                        break;
+
+                    default:
+                        if (props.stageIndex > props.oldStageIndex)
+                            props.currentThumbsOffset -= props.initialThumbsOffset;
+                        else
+                            props.currentThumbsOffset += props.initialThumbsOffset;
+                        break;
+                }
+            }
+
+            (props.currentThumbsOffset != props.initialThumbsOffset) && performScrollThumbs();
+        }
+
+        // function scrollThumbs(dim)
+        function performScrollThumbs(coord){
+            var cool = css3(['transition', 'transform']);
+            !coord && (coord = 'x');
+
+            if (cool){
+                var style = $objects.thumbsScrollable.get(0).style;
+                style[cool.transition] = 'all '+settings.scrollSpeed+'ms linear';
+
+                switch(coord){
+                    case 'x':
+                        style[cool.transform] = 'translate3d('+props.currentThumbsOffset+'px, 0, 0)';
+                        break;
+
+                    case 'y':
+                        style[cool.transform] = 'translate3d(0, '+props.currentThumbsOffset+'px, 0)';
+                        break;
+
+                    case 'z':
+                        style[cool.transform] = 'translate3d(0, 0, '+props.currentThumbsOffset+'px)';
+                        break;
+                }
+            }
+            else {
+                coord = (coord == 'x' ? 'left' : 'top');
+                var animation = {};
+                animation[coord] = props.currentThumbsOffset;
+                $objects.thumbsScrollable.animate(animation, settings.scrollSpeed);
             }
         }
 
@@ -396,4 +463,4 @@
             return activeIndex;
         }
     }
-})(jQuery);
+})(jQuery, window, document);
