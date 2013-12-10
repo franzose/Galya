@@ -1,6 +1,6 @@
 (function($, undefined){
     $.fn.galya = function(args){
-        //
+        // Default settings
         var settings = {
             //animation: 'fade', not implemented
             autoplay: false,
@@ -41,11 +41,11 @@
     }
 
     /**
-     *
+     * Galya gallery class.
      *
      * @constructor
-     * @param $container
-     * @param settings
+     * @param $container {jQuery} gallery container
+     * @param settings {Object} user-provided settings
      */
     function Galya($container, settings){
         //
@@ -80,18 +80,19 @@
             // 'previous slide' control
             prev: 'galya-prev',
 
+            // active state class
             active: 'active'
         };
 
-        //
+        // Cache of the jQuery objects created from the gallery
+        // HTML structure and then used by the gallery
         var $objects = {};
 
-        //
+        // Some useful internally used properties
         var props = {};
 
-        /**
-         *
-         */
+        // Renders the gallery, caches its HTML structure as jQuery objects,
+        // assigns events callbacks
         this.initialize = function(){
             $objects.container = $container;
             $objects.sourceImages = $('> img', $container);
@@ -108,9 +109,18 @@
             $objects.thumbs = $('.'+classes.thumbImage, $container);
             $objects.prev = $('.'+classes.prev, $container);
 
-            adjustSizes();
+            $objects.container.width(settings.slideWidth);
+            $objects.thumbs.width(settings.thumbnailWidth);
+
+            var containerWidth = $objects.container.width();
+            var thumbWidth = $objects.thumbs.width();
+            props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
+            var thumbsMarginLeft = parseInt($objects.thumbs.last().css('margin-left')) * (props.visibleThumbs-1);
+            props.initialOffset = (thumbWidth * (props.visibleThumbs-1) + thumbsMarginLeft);
+
             activateStage(0);
 
+            // Sets the appropriate heights based on the slide height
             $objects.images.first().load(function(){
                 var imageHeight = $(this).height();
 
@@ -120,7 +130,7 @@
                 $objects.prev.height(imageHeight);
             });
 
-            //
+            // Slide clicked
             $objects.images.on('click', function(ev){
                 if ($objects.thumbsScrollable.is(':animated'))
                     return false;
@@ -128,7 +138,7 @@
                 activateStage('next');
             });
 
-            //
+            // Thumbnail clicked
             $objects.thumbs.on('click', function(){
                 var $this = $(this);
 
@@ -138,7 +148,7 @@
                 activateStage($this.index());
             });
 
-            //
+            // Prev button clicked
             $objects.prev.on('click', function(){
                 if ($objects.thumbsScrollable.is(':animated'))
                     return false;
@@ -147,18 +157,7 @@
             });
         };
 
-        function adjustSizes(){
-            $objects.container.width(settings.slideWidth);
-            $objects.thumbs.width(settings.thumbnailWidth);
-
-            var containerWidth = $objects.container.width();
-            var thumbWidth = $objects.thumbs.width();
-            props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
-            var thumbsMarginLeft = parseInt($objects.thumbs.last().css('margin-left')) * (props.visibleThumbs-1);
-            props.initialOffset = (thumbWidth * (props.visibleThumbs-1) + thumbsMarginLeft);
-        }
-
-        //
+        // Gets 'valid' attributes from the source image
         function getImageAttrs($image){
             return {
                 src:     $image.attr('src'),
@@ -221,7 +220,8 @@
             $objects.container.append('<div class="'+classes.prev+'"><span>&#x276e;</span></div>');
         }
 
-        //
+        // Stage is a simply slide and thumb together
+        // Here, it gets a stage by index
         function getStageByIndex(index){
             return {
                 slide: getElementByIndex($objects.slides, index),
@@ -240,25 +240,25 @@
             scrollThumbs(direction);
         }
 
-        //
+        // Sets the slide active
         function activateSlide($slide){
             $slide.fadeIn(settings.fadeSpeed, function(){
                 $(this).addClass(classes.active);
             });
         }
 
-        //
+        // Sets the thumbnail active
         function activateThumb($thumb){
             $thumb.addClass(classes.active);
         }
 
-        //
+        // Sets inactive currently active slide and thumbnail
         function deactivateStage(){
             deactivateSlide();
             return deactivateThumb();
         }
 
-        //
+        // Sets inactive currently active slide
         function deactivateSlide(){
             var $element = getActiveElement($objects.slides);
             var index = $element.index();
@@ -270,7 +270,7 @@
             return index;
         }
 
-        //
+        // Sets inactive currently active thumbnail
         function deactivateThumb(){
             var $element = getActiveElement($objects.thumbs);
             var index = $element.index();
@@ -287,14 +287,16 @@
             }).first();
         }
 
-        //
+        // Filters a collection by given index
         function getElementByIndex($collection, index){
             return $collection.filter(function(idx, el){
                 return $(el).index() == index;
             }).first();
         }
 
-        //
+        // Guesses the following stage index by the given direction.
+        // Stops from overflowing the number of the gallery slides
+        // by 'flushing' the index to zero or the number of the slides.
         function getStageIndexByDirection(direction){
             var activeIndex = getActiveElement($objects.slides).index();
 
@@ -325,34 +327,58 @@
             return activeIndex;
         }
 
+        // Performs thumbnails container srolling
         function scrollThumbs(direction){
-            var isNeedle = (props.stageIndex != 0 && (props.stageIndex % (props.visibleThumbs-1) == 0));
 
-            if (props.stageIndex == 0 && props.oldStageIndex == $objects.slides.length-1){
+            // When we get to the last slide of the gallery
+            var endReached = (props.stageIndex == 0 && props.oldStageIndex == $objects.slides.length-1);
+
+            // When we get to the first slide of the gallery
+            var startReached = (props.oldStageIndex == 0 && props.stageIndex == $objects.slides.length-1);
+
+            // Determines direction of the thumbnails container animation
+            var sign = '';
+
+            // Index of the current gallery slide.
+            // It is used to determine, if the slide is the last or the first visible
+            // in a row of the thumbnails, so we need to scroll its container left or right.
+            var currentIndex = null;
+
+            switch(direction){
+                case 'prev':
+                    sign = '+=';
+                    currentIndex = props.oldStageIndex;
+                    break;
+
+                case 'next':
+                    sign = '-=';
+                    currentIndex = props.stageIndex;
+                    break;
+
+                default:
+                    sign = (props.stageIndex > props.oldStageIndex ? '-=' : '+=');
+                    currentIndex = props.stageIndex;
+                    break;
+            }
+
+            var isLastOrFirstVisible = (currentIndex != 0 && (currentIndex % (props.visibleThumbs-1) == 0));
+
+            // When the last slide of the gallery is reached,
+            // we scroll the thumbnails container back to the first slide
+            if (endReached){
                 $objects.thumbsScrollable.animate({ marginLeft: 0 }, settings.scrollSpeed);
             }
-            else if (props.oldStageIndex == 0 && props.stageIndex == $objects.slides.length-1){
+            // Whe the first slide of the gallery is reached,
+            // in opposite, we scroll the thumbnails container to the last slide
+            else if (startReached){
                 $objects.thumbsScrollable.animate({
                     marginLeft: -(props.initialOffset * ($objects.slides.length/props.visibleThumbs))
                 }, settings.scrollSpeed);
             }
-            else if (isNeedle){
-                var sign = null;
-
-                switch(direction){
-                    case 'prev':
-                        sign = '+=';
-                        break;
-
-                    case 'next':
-                        sign = '-=';
-                        break;
-
-                    default:
-                        sign = (props.stageIndex > props.oldStageIndex ? '-=' : '+=');
-                        break;
-                }
-
+            // When we get a thumbnail that is the first or the last visible
+            // in the current stack of thumbnails, we scrool the thumbnails container
+            // by direction, determined by the sign
+            else if (isLastOrFirstVisible){
                 $objects.thumbsScrollable.animate({ marginLeft: sign+props.initialOffset }, settings.scrollSpeed);
             }
         }
