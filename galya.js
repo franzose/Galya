@@ -339,16 +339,19 @@
             // When we get to the first slide of the gallery
             var startReached = (props.oldStageIndex == 0 && props.stageIndex == $objects.slides.length-1);
 
-            // Determines direction of the thumbnails container animation
-            var sign = '';
-
             // Index of the current gallery slide.
             // It is used to determine, if the slide is the last or the first visible
-            // in a row of the thumbnails, so we need to scroll its container left or right.
+            // in a row of the thumbnails, so we need to scroll its container left or right
             var currentIndex = (direction == 'prev' ? props.oldStageIndex : props.stageIndex);
 
-            //
-            var isLastOrFirstVisible = (currentIndex != 0 && (currentIndex % (props.visibleThumbs-1) == 0));
+            // Whether the current thumbnail is first or last visible one
+            // in a row of the thumbnails
+            var isFirstOrLastVisible = function(index){
+                return (index != 0 && (index % (props.visibleThumbs-1) == 0));
+            };
+
+            // Whether the current thumbnail is partially visible one
+            var partiallyVisible = (isFirstOrLastVisible(currentIndex-1));
 
             // When the last slide of the gallery is reached,
             // we scroll the thumbnails container back to the first slide
@@ -360,10 +363,10 @@
             else if (startReached){
                 props.currentThumbsOffset = -(props.initialThumbsOffset * Math.floor(($objects.slides.length/props.visibleThumbs)));
             }
-            // When we get a thumbnail that is the first or the last visible
-            // in the current stack of thumbnails, we scrool the thumbnails container
-            // by direction, determined by the sign
-            else if (isLastOrFirstVisible){
+            // When we get a thumbnail that is the first or the last visible thumbnail
+            // in the current row of thumbnails, we scroll the thumbnails container
+            // by direction, determined by the given argument
+            else if (isFirstOrLastVisible(currentIndex)){
                 switch(direction){
                     case 'prev':
                         props.currentThumbsOffset += props.initialThumbsOffset;
@@ -380,6 +383,9 @@
                             props.currentThumbsOffset += props.initialThumbsOffset;
                         break;
                 }
+            }
+            else if (partiallyVisible){
+                props.currentThumbsOffset -= props.initialThumbsOffset;
             }
 
             (props.currentThumbsOffset != props.initialThumbsOffset) && performScrollThumbs();
