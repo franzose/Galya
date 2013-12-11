@@ -143,6 +143,7 @@
 
             var containerWidth = $objects.container.width();
             var thumbWidth = getThumbWidth();
+
             props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
             props.initialThumbsOffset = (thumbWidth * (props.visibleThumbs-1));
             props.currentThumbsOffset = 0;
@@ -284,16 +285,20 @@
 
         // Sets the slide active
         function activateSlide($slide){
+            $container.triggerHandler('slide.activating', [props.stageIndex, $slide]);
+
             $slide.fadeIn(settings.fadeSpeed, function(){
                 $(this).addClass(classes.active);
-            });
 
-            //settings.slideActivation().call();
+                $container.triggerHandler('slide.activated', [props.stageIndex, $slide]);
+            });
         }
 
         // Sets the thumbnail active
         function activateThumb($thumb){
+            $container.triggerHandler('thumb.activating', [props.stageIndex, $thumb]);
             $thumb.addClass(classes.active);
+            $container.triggerHandler('thumb.activated', [props.stageIndex, $thumb]);
         }
 
         // Sets inactive currently active slide and thumbnail
@@ -313,8 +318,11 @@
             var $element = getActiveElement($objects.slides);
             var index = $element.index();
 
+            $container.triggerHandler('slide.deactivating', [index, $element]);
+
             $element.fadeOut(settings.fadeSpeed, function(){
                 $(this).removeClass(classes.active);
+                $container.triggerHandler('slide.deactivated', [index, $element]);
             });
 
             return index;
@@ -325,7 +333,9 @@
             var $element = getActiveElement($objects.thumbs);
             var index = $element.index();
 
+            $container.triggerHandler('thumb.deactivating', [index, $element]);
             $element.removeClass(classes.active);
+            $container.triggerHandler('slide.deactivated', [index, $element]);
 
             return index;
         }
@@ -343,6 +353,12 @@
             // It is used to determine, if the slide is the last or the first visible
             // in a row of the thumbnails, so we need to scroll its container left or right
             var currentIndex = (direction == 'prev' ? props.oldStageIndex : props.stageIndex);
+
+            //
+            var movingForward = (props.stageIndex > props.oldStageIndex);
+
+            // Flag to determine whether the stage change was triggered by a thumbnail click
+            var directionIsInt = (typeof direction === 'number' && (direction % 1) === 0);
 
             // Whether the current thumbnail is first or last visible one
             // in a row of the thumbnails
@@ -377,14 +393,16 @@
                         break;
 
                     default:
-                        if (props.stageIndex > props.oldStageIndex)
+                        if (movingForward)
                             props.currentThumbsOffset -= props.initialThumbsOffset;
                         else
                             props.currentThumbsOffset += props.initialThumbsOffset;
                         break;
                 }
             }
-            else if (partiallyVisible){
+            // When we get a thumbnail that is only partially visible
+            // (next to the last visibleThumbs stack)
+            else if (partiallyVisible && directionIsInt && movingForward){
                 props.currentThumbsOffset -= props.initialThumbsOffset;
             }
 
@@ -392,9 +410,10 @@
         }
 
         // function scrollThumbs(dim)
-        function performScrollThumbs(coord){
+        function performScrollThumbs(coord, offset){
             var cool = css3(['transition', 'transform']);
             !coord && (coord = 'x');
+            !offset && (offset = props.currentThumbsOffset);
 
             if (cool){
                 var style = $objects.thumbsScrollable.get(0).style;
@@ -402,15 +421,15 @@
 
                 switch(coord){
                     case 'x':
-                        style[cool.transform] = 'translate3d('+props.currentThumbsOffset+'px, 0, 0)';
+                        style[cool.transform] = 'translate3d('+offset+'px, 0, 0)';
                         break;
 
                     case 'y':
-                        style[cool.transform] = 'translate3d(0, '+props.currentThumbsOffset+'px, 0)';
+                        style[cool.transform] = 'translate3d(0, '+offset+'px, 0)';
                         break;
 
                     case 'z':
-                        style[cool.transform] = 'translate3d(0, 0, '+props.currentThumbsOffset+'px)';
+                        style[cool.transform] = 'translate3d(0, 0, '+offset+'px)';
                         break;
                 }
             }
