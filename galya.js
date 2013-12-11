@@ -269,46 +269,29 @@
         function activateStage(direction){
             props.stage = getStageByIndex(getStageIndexByDirection(direction));
             props.stageIndex = props.stage.slide.index();
-
-            $container.triggerHandler('stage.activating', [props.stageIndex, props.stage]);
-
             props.oldStageIndex = deactivateStage();
 
             activateSlide(props.stage.slide);
             activateThumb(props.stage.thumb);
             scrollThumbs(direction);
-
-            //$container.on('thumbs.scrollingEnd', function(){
-            $container.triggerHandler('stage.activated', [props.stageIndex, props.stage]);
-            //});
         }
 
         // Sets the slide active
         function activateSlide($slide){
-            $container.triggerHandler('slide.activating', [props.stageIndex, $slide]);
-
             $slide.fadeIn(settings.fadeSpeed, function(){
                 $(this).addClass(classes.active);
-
-                $container.triggerHandler('slide.activated', [props.stageIndex, $slide]);
             });
         }
 
         // Sets the thumbnail active
         function activateThumb($thumb){
-            $container.triggerHandler('thumb.activating', [props.stageIndex, $thumb]);
             $thumb.addClass(classes.active);
-            $container.triggerHandler('thumb.activated', [props.stageIndex, $thumb]);
         }
 
         // Sets inactive currently active slide and thumbnail
         function deactivateStage(){
-            $container.triggerHandler('stage.deactivating', [props.stageIndex, props.stage]);
-
             var index = deactivateSlide();
             deactivateThumb();
-
-            $container.triggerHandler('stage.deactivated', [props.stageIndex, props.stage]);
 
             return index;
         }
@@ -318,11 +301,8 @@
             var $element = getActiveElement($objects.slides);
             var index = $element.index();
 
-            $container.triggerHandler('slide.deactivating', [index, $element]);
-
             $element.fadeOut(settings.fadeSpeed, function(){
                 $(this).removeClass(classes.active);
-                $container.triggerHandler('slide.deactivated', [index, $element]);
             });
 
             return index;
@@ -333,9 +313,7 @@
             var $element = getActiveElement($objects.thumbs);
             var index = $element.index();
 
-            $container.triggerHandler('thumb.deactivating', [index, $element]);
             $element.removeClass(classes.active);
-            $container.triggerHandler('slide.deactivated', [index, $element]);
 
             return index;
         }
