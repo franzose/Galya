@@ -192,13 +192,15 @@
             if (settings.autoplay === true){
                 var interval = autoplay();
 
-                $objects.slidesContainer.on('mouseenter', function(){
-                    clearInterval(interval);
-                });
+                if (settings.pauseOnHover === true){
+                    $objects.slidesContainer.on('mouseenter', function(){
+                        clearInterval(interval);
+                    });
 
-                $objects.slidesContainer.on('mouseleave', function(){
-                    interval = autoplay();
-                });
+                    $objects.slidesContainer.on('mouseleave', function(){
+                        interval = autoplay();
+                    });
+                }
             }
         };
 
