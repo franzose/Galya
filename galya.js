@@ -139,7 +139,7 @@
             $container.width(settings.slideWidth);
             $objects.thumbs.width(settings.thumbnailWidth);
 
-            var containerWidth = $objects.container.width();
+            var containerWidth = $container.width();
             var thumbWidth = getThumbWidth();
 
             props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
@@ -247,7 +247,7 @@
                 html += figureHTML+'</figure>';
             });
 
-            $objects.container.html('<div class="'+classes.slidesContainer+'">'+html+'</div>');
+            $container.html('<div class="'+classes.slidesContainer+'">'+html+'</div>');
         }
 
         // Renders thumbnails for the slides
@@ -261,13 +261,13 @@
                 html += '<img class="'+classes.thumbImage+'" src="'+attrs.src+'" alt="'+attrs.alt+'">';
             });
 
-            $objects.container.append('<div class="'+classes.thumbsContainer+'">'+
+            $container.append('<div class="'+classes.thumbsContainer+'">'+
                 '<div class="'+classes.thumbsScrollable+'">'+html+'</div></div>');
         }
 
         // Renders navigation controls
         function renderNavControls(){
-            $objects.container.append('<div class="'+classes.prev+'"><span>&#x276e;</span></div>');
+            $container.append('<div class="'+classes.prev+'"><span>&#x276e;</span></div>');
         }
 
         // Stage is a simply slide and thumb together
