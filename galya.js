@@ -191,7 +191,7 @@
             $objects.thumbs.on('click', function(ev){
                 var $this = $(this);
 
-                if ($this.hasClass(classes.active))
+                if ($this.hasClass(classes.active) || $objects.slides.is(':animated'))
                     return false;
 
                 if (settings.autoplay === true)
