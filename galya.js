@@ -145,7 +145,8 @@
             var thumbWidth = getThumbWidth();
 
             props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
-            props.initialThumbsOffset = (thumbWidth * (props.visibleThumbs-1));
+            props.visibleThumbsFromZero = props.visibleThumbs-1;
+            props.initialThumbsOffset = thumbWidth * props.visibleThumbsFromZero;
             props.currentThumbsOffset = 0;
 
             activateStage(0);
@@ -171,13 +172,13 @@
             });
 
             // Thumbnail clicked
-            $objects.thumbs.on('click', function(){
+            $objects.thumbs.on('click', function(ev){
                 var $this = $(this);
 
                 if ($this.hasClass(classes.active))
                     return false;
 
-                activateStage($this.index());
+                activateStage($this.index(), (ev.clientX > props.initialThumbsOffset));
             });
 
             // Prev button clicked
@@ -266,14 +267,14 @@
         }
 
         // Activates a stage (slide and its thumbnail)
-        function activateStage(direction){
-            props.stage = getStageByIndex(getStageIndexByDirection(direction));
-            props.stageIndex = props.stage.slide.index();
+        function activateStage(direction, senderIsPartiallyVisibleThumbnail){
+            props.stageIndex = getStageIndexByDirection(direction);
+            props.stage = getStageByIndex(props.stageIndex);
             props.oldStageIndex = deactivateStage();
 
             activateSlide(props.stage.slide);
             activateThumb(props.stage.thumb);
-            scrollThumbs(direction);
+            scrollThumbs(direction, senderIsPartiallyVisibleThumbnail);
         }
 
         // Sets the slide active
@@ -299,11 +300,15 @@
         // Sets inactive currently active slide
         function deactivateSlide(){
             var $element = getActiveElement($objects.slides);
-            var index = $element.index();
+            var index = 0;
 
-            $element.fadeOut(settings.fadeSpeed, function(){
-                $(this).removeClass(classes.active);
-            });
+            if ($element.length){
+                index = $element.index();
+
+                $element.fadeOut(settings.fadeSpeed, function(){
+                    $(this).removeClass(classes.active);
+                });
+            }
 
             return index;
         }
@@ -311,15 +316,18 @@
         // Sets inactive currently active thumbnail
         function deactivateThumb(){
             var $element = getActiveElement($objects.thumbs);
-            var index = $element.index();
+            var index = 0;
 
-            $element.removeClass(classes.active);
+            if ($element.length){
+                index = $element.index();
+                $element.removeClass(classes.active);
+            }
 
             return index;
         }
 
         // Performs thumbnails container srolling
-        function scrollThumbs(direction){
+        function scrollThumbs(direction, senderIsPartiallyVisibleThumbnail){
 
             // When we get to the last slide of the gallery
             var endReached = (props.stageIndex == 0 && props.oldStageIndex == $objects.slides.length-1);
@@ -332,20 +340,9 @@
             // in a row of the thumbnails, so we need to scroll its container left or right
             var currentIndex = (direction == 'prev' ? props.oldStageIndex : props.stageIndex);
 
-            //
-            var movingForward = (props.stageIndex > props.oldStageIndex);
-
-            // Flag to determine whether the stage change was triggered by a thumbnail click
-            var directionIsInt = (typeof direction === 'number' && (direction % 1) === 0);
-
-            // Whether the current thumbnail is first or last visible one
-            // in a row of the thumbnails
-            var isFirstOrLastVisible = function(index){
-                return (index != 0 && (index % (props.visibleThumbs-1) == 0));
-            };
-
-            // Whether the current thumbnail is partially visible one
-            var partiallyVisible = (isFirstOrLastVisible(currentIndex-1));
+            // Whether the current thumbnail is first
+            // or last visible one in a row of the thumbnails
+            var isEdge = (currentIndex != 0 && (currentIndex % props.visibleThumbsFromZero == 0));
 
             // When the last slide of the gallery is reached,
             // we scroll the thumbnails container back to the first slide
@@ -355,12 +352,12 @@
             // Whe the first slide of the gallery is reached,
             // in opposite, we scroll the thumbnails container to the last slide
             else if (startReached){
-                props.currentThumbsOffset = -(props.initialThumbsOffset * Math.floor(($objects.slides.length/props.visibleThumbs)));
+                props.currentThumbsOffset = -(props.initialThumbsOffset * Math.floor($objects.slides.length/props.visibleThumbs));
             }
             // When we get a thumbnail that is the first or the last visible thumbnail
             // in the current row of thumbnails, we scroll the thumbnails container
             // by direction, determined by the given argument
-            else if (isFirstOrLastVisible(currentIndex)){
+            else if (isEdge){
                 switch(direction){
                     case 'prev':
                         props.currentThumbsOffset += props.initialThumbsOffset;
@@ -371,7 +368,7 @@
                         break;
 
                     default:
-                        if (movingForward)
+                        if (props.stageIndex > props.oldStageIndex)
                             props.currentThumbsOffset -= props.initialThumbsOffset;
                         else
                             props.currentThumbsOffset += props.initialThumbsOffset;
@@ -380,7 +377,7 @@
             }
             // When we get a thumbnail that is only partially visible
             // (next to the last visibleThumbs stack)
-            else if (partiallyVisible && directionIsInt && movingForward){
+            else if (senderIsPartiallyVisibleThumbnail){
                 props.currentThumbsOffset -= props.initialThumbsOffset;
             }
 
