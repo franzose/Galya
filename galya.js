@@ -145,6 +145,11 @@
 
             // Sets the appropriate heights based on the slide height
             $objects.images.first().load(function(){
+                var $this = $(this);
+
+                if ($this.width() > settings.slideWidth)
+                    $this.width(settings.slideWidth);
+
                 var imageWidth = $(this).width();
                 var imageHeight = $(this).height();
 
