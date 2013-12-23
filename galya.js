@@ -122,7 +122,6 @@
         // Renders the gallery, caches its HTML structure as jQuery objects,
         // assigns events callbacks
         this.initialize = function(){
-            $objects.container = $container;
             $objects.sourceImages = $('> img', $container);
 
             renderSlidesList();
@@ -137,7 +136,7 @@
             $objects.thumbs = $('.'+classes.thumbImage, $container);
             $objects.prev = $('.'+classes.prev, $container);
 
-            $objects.container.width(settings.slideWidth);
+            $container.width(settings.slideWidth);
             $objects.thumbs.width(settings.thumbnailWidth);
 
             var containerWidth = $objects.container.width();
@@ -203,17 +202,6 @@
                 }
             }
         };
-
-        // Registers interval based on given duration
-        // and triggers slides animation
-        function autoplay(){
-            var interval = setInterval(function(){
-                $container.stop(true, true);
-                activateStage('next');
-            }, settings.duration);
-
-            return interval;
-        }
 
         // Gets 'valid' attributes from the source image
         function getImageAttrs($image){
@@ -289,6 +277,17 @@
                 slide: getElementByIndex($objects.slides, index),
                 thumb: getElementByIndex($objects.thumbs, index)
             }
+        }
+
+        // Registers interval based on given duration
+        // and triggers slides animation
+        function autoplay(){
+            var interval = setInterval(function(){
+                $container.stop(true, true);
+                activateStage('next');
+            }, settings.duration);
+
+            return interval;
         }
 
         // Activates a stage (slide and its thumbnail)
