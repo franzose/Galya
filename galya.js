@@ -31,9 +31,13 @@
     $.fn.galya = function(args){
         // Default settings
         var settings = {
-            //animation: 'fade', not implemented
+            // Whether slides will be animated automatically
             autoplay: false,
+
+            // Autoplay duration
             duration: 3000,
+
+            // Whether to pause autoplay on slide hovering
             pauseOnHover: false,
 
             // fadeIn, fadeOut speed
@@ -191,12 +195,30 @@
                 activateStage('prev');
             });
 
+            // Autoplay running and pausing
             if (settings.autoplay === true){
-                setInterval(function(){
-                    activateStage('next');
-                }, settings.duration);
+                var interval = autoplay();
+
+                $objects.slidesContainer.on('mouseenter', function(){
+                    clearInterval(interval);
+                });
+
+                $objects.slidesContainer.on('mouseleave', function(){
+                    interval = autoplay();
+                });
             }
         };
+
+        // Registers interval based on given duration
+        // and triggers slides animation
+        function autoplay(){
+            var interval = setInterval(function(){
+                $container.stop(true, true);
+                activateStage('next');
+            }, settings.duration);
+
+            return interval;
+        }
 
         // Gets 'valid' attributes from the source image
         function getImageAttrs($image){
