@@ -42,6 +42,36 @@ In the body section, place your photos in the order you want and wrap them with 
 | captionContentTag | caption content wrapper tag | p
 | thumbnailWidth | thumbnail width, px | 110
 
+Being simple, Galya does not impose the rules, it offers a base configuration. So, look and feel of your gallery is in your hands. In the future, there will be feature of applying custom effects on slides changing and thumbnails scrollings.
+
+### Slides captions
+
+By default, caption is generated from `alt` attribute of an `img` tag. So, if you want your description to differ from `alt` attribute, you just add `data-content` attribute to the `img` tag with the description you want:
+
+```html
+<div class="your-gallery">
+  <img src="/1.jpg" alt="Photo 1" data-content="Long photo description 1">
+  <img src="/2.jpg" alt="Photo 2" data-content="Long photo description 2">
+  <img src="/3.jpg" alt="Photo 3" data-content="Long photo description 3">
+  <img src="/4.jpg" alt="Photo 4" data-content="Long photo description 4">
+  <img src="/5.jpg" alt="Photo 5" data-content="Long photo description 5">
+</div>
+```
+
+Also you can add heading to your caption doing as following:
+
+```html
+<div class="your-gallery">
+  <img src="/1.jpg" alt="Photo 1" data-title="Title 1" data-content="Long photo description 1">
+  <img src="/2.jpg" alt="Photo 2" data-title="Title 2" data-content="Long photo description 2">
+  <img src="/3.jpg" alt="Photo 3" data-title="Title 3" data-content="Long photo description 3">
+  <img src="/4.jpg" alt="Photo 4" data-title="Title 4" data-content="Long photo description 4">
+  <img src="/5.jpg" alt="Photo 5" data-title="Title 5" data-content="Long photo description 5">
+</div>
+```
+
+Notice that, by default, caption rendering is disabled by `showCaptions: false`.
+
 <hr>
 # Тётя Галя. Простая, как три рубля.
 
@@ -80,8 +110,38 @@ In the body section, place your photos in the order you want and wrap them with 
 | pauseOnHover | остановка слайдшоу при наведении мыши на слайд | false |
 | fadeSpeed | скорость затухания и появления слайдов, мсек | 500 |
 | scrollSpeed | скорость прокрутки превьюшек, мсек | 250 |
-| slideWidth | ширина слайда (большого изображения), пикс | 725
-| showCaptions | показывать/не показывать описание слайдов | false
-| headingLevel | уровень заголовка (h1-h6) в подписи к слайду | 4
-| captionContentTag | тег, обрамляющий текст подписи к слайду | p
-| thumbnailWidth | ширина превьюшки, пикс | 110
+| slideWidth | ширина слайда (большого изображения), пикс | 725 |
+| showCaptions | показывать/не показывать описание слайдов | false |
+| headingLevel | уровень заголовка (h1-h6) в подписи к слайду | 4 |
+| captionContentTag | тег, обрамляющий текст подписи к слайду | p |
+| thumbnailWidth | ширина превьюшки, пикс | 110 |
+
+Будучи простой, Тётя Галя не навязывает своих правил, она предлагает базовую конфигурацию. Поэтому внешний вид фотогалереи полностью в ваших руках. В будущем появится возможность изменять эффект перехода между слайдами и при скроллинге превьюшек.
+
+### Подписи к слайдам
+
+По умолчанию подпись к слайду берется из атрибута `alt` у тега `img`. Если вы хотите оставить атрибут `alt` нетронутым, но при этом добавить отличное от его содержимого описание фотографии, добавьте в тег `img` атрибут `data-content`:
+
+```html
+<div class="your-gallery">
+  <img src="/1.jpg" alt="Фото 1" data-content="Длинное описание фото 1">
+  <img src="/2.jpg" alt="Фото 2" data-content="Длинное описание фото 2">
+  <img src="/3.jpg" alt="Фото 3" data-content="Длинное описание фото 3">
+  <img src="/4.jpg" alt="Фото 4" data-content="Длинное описание фото 4">
+  <img src="/5.jpg" alt="Фото 5" data-content="Длинное описание фото 5">
+</div>
+```
+
+К подписи также можно добавить заголовок:
+
+```html
+<div class="your-gallery">
+  <img src="/1.jpg" alt="Фото 1" data-title="Заголовок фото 1" data-content="Длинное описание фото 1">
+  <img src="/2.jpg" alt="Фото 2" data-title="Заголовок фото 2" data-content="Длинное описание фото 2">
+  <img src="/3.jpg" alt="Фото 3" data-title="Заголовок фото 3" data-content="Длинное описание фото 3">
+  <img src="/4.jpg" alt="Фото 4" data-title="Заголовок фото 4" data-content="Длинное описание фото 4">
+  <img src="/5.jpg" alt="Фото 5" data-title="Заголовок фото 5" data-content="Длинное описание фото 5">
+</div>
+```
+
+Обратите внимание, что по умолчанию вывод описания фотографии выключен: `showCaptions: false`. 
