@@ -197,7 +197,9 @@
                 if (settings.autoplay === true)
                     resetAutoplay();
 
-                activateStage($this.index(), (ev.clientX > props.initialThumbsOffset));
+                var mouseOffset = ev.pageX - $objects.thumbsContainer.offset().left;
+
+                activateStage($this.index(), (mouseOffset > props.initialThumbsOffset));
             });
 
             // Prev button clicked
