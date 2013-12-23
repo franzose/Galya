@@ -33,6 +33,8 @@
         var settings = {
             //animation: 'fade', not implemented
             autoplay: false,
+            duration: 3000,
+            pauseOnHover: false,
 
             // fadeIn, fadeOut speed
             fadeSpeed: 500,
@@ -145,8 +147,8 @@
             var thumbWidth = getThumbWidth();
 
             props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
-            props.visibleThumbsFromZero = props.visibleThumbs-1;
-            props.initialThumbsOffset = thumbWidth * props.visibleThumbsFromZero;
+            props.scrollingThumbs = props.visibleThumbs-1;
+            props.initialThumbsOffset = thumbWidth * props.scrollingThumbs;
             props.currentThumbsOffset = 0;
 
             activateStage(0);
@@ -188,6 +190,12 @@
 
                 activateStage('prev');
             });
+
+            if (settings.autoplay === true){
+                setInterval(function(){
+                    activateStage('next');
+                }, settings.duration);
+            }
         };
 
         // Gets 'valid' attributes from the source image
@@ -342,7 +350,7 @@
 
             // Whether the current thumbnail is first
             // or last visible one in a row of the thumbnails
-            var isEdge = (currentIndex != 0 && (currentIndex % props.visibleThumbsFromZero == 0));
+            var isEdge = (currentIndex != 0 && (currentIndex % props.scrollingThumbs == 0));
 
             // When the last slide of the gallery is reached,
             // we scroll the thumbnails container back to the first slide
