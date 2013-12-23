@@ -40,21 +40,14 @@
             // Whether to pause autoplay on slide hovering
             pauseOnHover: false,
 
-            // fadeIn, fadeOut speed
+            // slides fadeIn, fadeOut animation speed
             fadeSpeed: 500,
 
             // thumbnails container left-right scroll
             scrollSpeed: 250,
 
+            // large slide width
             slideWidth: 725,
-            slideHeight: 'auto', //not implemented
-
-            // whether to crop when a slide is larger
-            // than its container
-            slideCrop: false, //not implemented
-
-            // sides to crop from
-            slideCropBy: ['bottom', 'right'], //not implemented
 
             // caption heading level: 1-6
             headingLevel: 4,
@@ -62,8 +55,8 @@
             // caption content wrapping tag: div, p, whatever
             captionContentTag: 'p',
 
-            thumbnailWidth: 110,
-            thumbnailHeight: 'auto' //not implemented
+            // preview images width
+            thumbnailWidth: 110
         };
 
         args && $.extend(settings, args);
