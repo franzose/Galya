@@ -150,6 +150,8 @@
             props.initialThumbsOffset = thumbWidth * props.scrollingThumbs;
             props.currentThumbsOffset = 0;
 
+            props.autoplayId = -1;
+
             activateStage(0);
 
             // Sets the appropriate heights based on the slide height
@@ -169,6 +171,9 @@
                 if ($objects.thumbsScrollable.is(':animated'))
                     return false;
 
+                if (settings.autoplay === true)
+                    resetAutoplay();
+
                 activateStage('next');
             });
 
@@ -179,6 +184,9 @@
                 if ($this.hasClass(classes.active))
                     return false;
 
+                if (settings.autoplay === true)
+                    resetAutoplay();
+
                 activateStage($this.index(), (ev.clientX > props.initialThumbsOffset));
             });
 
@@ -187,20 +195,23 @@
                 if ($objects.thumbsScrollable.is(':animated'))
                     return false;
 
+                if (settings.autoplay === true)
+                    resetAutoplay();
+
                 activateStage('prev');
             });
 
             // Autoplay running and pausing
             if (settings.autoplay === true){
-                var interval = autoplay();
+                autoplay();
 
                 if (settings.pauseOnHover === true){
                     $objects.slidesContainer.on('mouseenter', function(){
-                        clearInterval(interval);
+                        clearInterval(props.autoplayId);
                     });
 
                     $objects.slidesContainer.on('mouseleave', function(){
-                        interval = autoplay();
+                        autoplay();
                     });
                 }
             }
@@ -285,12 +296,15 @@
         // Registers interval based on given duration
         // and triggers slides animation
         function autoplay(){
-            var interval = setInterval(function(){
+            props.autoplayId = setInterval(function(){
                 $container.stop(true, true);
                 activateStage('next');
             }, settings.duration);
+        }
 
-            return interval;
+        function resetAutoplay(){
+            clearInterval(props.autoplayId);
+            autoplay();
         }
 
         // Activates a stage (slide and its thumbnail)
@@ -395,10 +409,14 @@
                         break;
 
                     default:
-                        if (props.stageIndex > props.oldStageIndex)
+                        if (props.stageIndex > props.oldStageIndex){
                             props.currentThumbsOffset -= props.initialThumbsOffset;
-                        else
-                            props.currentThumbsOffset += props.initialThumbsOffset;
+                        }
+                        else {
+                            if (settings.autoplay === false){
+                                props.currentThumbsOffset += props.initialThumbsOffset;
+                            }
+                        }
                         break;
                 }
             }
