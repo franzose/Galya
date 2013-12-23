@@ -10,7 +10,7 @@
     width:100%; height:100%;  margin:0;
 }
 
-.galya-image { position:absolute; max-width:100%; width:100%; height:auto; cursor:pointer; }
+.galya-image { position:absolute; max-width:100%; /*width:100%;*/ height:auto; cursor:pointer; }
 .galya-caption {
     position:absolute; bottom:0; z-index:20;
     width:100%; padding:0.5em 1em; box-sizing:border-box;

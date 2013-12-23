@@ -139,24 +139,29 @@
             $objects.thumbs = $('.'+classes.thumbImage, $container);
             $objects.prev = $('.'+classes.prev, $container);
 
-            $container.width(settings.slideWidth);
-            $objects.thumbs.width(settings.thumbnailWidth);
-
-            var containerWidth = $container.width();
-            var thumbWidth = getThumbWidth();
-
-            props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
-            props.scrollingThumbs = props.visibleThumbs-1;
-            props.initialThumbsOffset = thumbWidth * props.scrollingThumbs;
-            props.currentThumbsOffset = 0;
-
             props.autoplayId = -1;
 
             activateStage(0);
 
             // Sets the appropriate heights based on the slide height
             $objects.images.first().load(function(){
+                var imageWidth = $(this).width();
                 var imageHeight = $(this).height();
+
+                if (imageWidth < settings.slideWidth)
+                    $container.width(imageWidth);
+                else
+                    $container.width(settings.slideWidth);
+
+                $objects.thumbs.width(settings.thumbnailWidth);
+
+                var containerWidth = $container.width();
+                var thumbWidth = getThumbWidth();
+
+                props.visibleThumbs = Math.floor(containerWidth / thumbWidth);
+                props.scrollingThumbs = props.visibleThumbs-1;
+                props.initialThumbsOffset = thumbWidth * props.scrollingThumbs;
+                props.currentThumbsOffset = 0;
 
                 $objects.slidesContainer.height(imageHeight);
                 $objects.thumbsContainer.height($objects.thumbs.parent().height());
