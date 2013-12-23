@@ -49,6 +49,9 @@
             // large slide width
             slideWidth: 725,
 
+            // show/bypass description of the slides
+            showCaptions: false,
+
             // caption heading level: 1-6
             headingLevel: 4,
 
@@ -228,7 +231,7 @@
                 var figureHTML = '<figure class="'+classes.slide+'">'+
                     '<img class="'+classes.slideImage+'" src="'+attrs.src+'" alt="'+attrs.alt+'">';
 
-                if (attrs.alt || attrs.content){
+                if (settings.showCaptions && (attrs.alt || attrs.content)){
                     figureHTML += '<figcaption class="'+classes.slideCaption+'">';
 
                     if (attrs.title){
