@@ -26,7 +26,7 @@
 .galya-thumbnail.active,
 .galya-thumbnail:hover { opacity:1; }
 .galya-thumbnail {
-    display:inline-block;
+    display:inline-block !important;
     width:110px; height:auto; margin-left:5px;
     opacity:0.45; cursor:pointer;
 }
