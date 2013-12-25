@@ -178,7 +178,7 @@
 
             // Slide clicked
             $objects.images.on('click', function(ev){
-                if ($objects.thumbsScrollable.is(':animated'))
+                if ($objects.thumbsScrollable.is(':animated') || $objects.slides.is(':animated'))
                     return false;
 
                 if (settings.autoplay === true)
